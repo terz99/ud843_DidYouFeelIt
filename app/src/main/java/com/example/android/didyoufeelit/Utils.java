@@ -15,6 +15,7 @@
  */
 package com.example.android.didyoufeelit;
 
+import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -39,6 +40,9 @@ public final class Utils {
 
     /** Tag for the log messages */
     public static final String LOG_TAG = Utils.class.getSimpleName();
+
+    // Successful HTTP response code
+    public static final int SUCCESSFUL_HTTP_RESPONSE = 200;
 
     /**
      * Query the USGS dataset and return an {@link Event} object to represent a single earthquake.
@@ -97,7 +101,7 @@ public final class Utils {
 
             // If the request was successful (response code 200),
             // then read the input stream and parse the response.
-            if (urlConnection.getResponseCode() == 200) {
+            if (urlConnection.getResponseCode() == SUCCESSFUL_HTTP_RESPONSE) {
                 inputStream = urlConnection.getInputStream();
                 jsonResponse = readFromStream(inputStream);
             } else {
@@ -167,4 +171,6 @@ public final class Utils {
         }
         return null;
     }
+
+
 }

@@ -15,6 +15,7 @@
  */
 package com.example.android.didyoufeelit;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
@@ -27,18 +28,17 @@ public class MainActivity extends AppCompatActivity {
 
     /** URL for earthquake data from the USGS dataset */
     private static final String USGS_REQUEST_URL =
-            "http://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2016-01-01&endtime=2016-05-02&minfelt=50&minmagnitude=5";
+            "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2016-01-01&endtime=2016-05-02&minfelt=50&minmagnitude=5";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Perform the HTTP request for earthquake data and process the response.
-        Event earthquake = Utils.fetchEarthquakeData(USGS_REQUEST_URL);
-
-        // Update the information displayed to the user.
-        updateUi(earthquake);
+        // Create a new background task to grab information from a given URL
+        EarthquakeAsyncTask backgroundTask = new EarthquakeAsyncTask();
+        // Execute the background task
+        backgroundTask.execute(USGS_REQUEST_URL);
     }
 
     /**
@@ -53,5 +53,38 @@ public class MainActivity extends AppCompatActivity {
 
         TextView magnitudeTextView = (TextView) findViewById(R.id.perceived_magnitude);
         magnitudeTextView.setText(earthquake.perceivedStrength);
+    }
+
+
+    /**
+     * This is a private custom class that extends AsyncTask class
+     * This class executes its given tasks on a background thread
+     */
+    private class EarthquakeAsyncTask extends AsyncTask<String, Void, Event>{
+
+        /**
+         * In this method all the tasks which it is assigned are done on a separate
+         * background method
+         * @param strings is an array of parameters, in this case of type String
+         * @return an Event object, which is actually details about an earthquake grabbed
+         * from the params provided
+         */
+        @Override
+        protected Event doInBackground(String... strings) {
+            return Utils.fetchEarthquakeData(strings[0]);
+        }
+
+
+        /**
+         * This method is done on the main thread after the background thread has finished
+         * executing its tasks
+         * It updates the UI with new information
+         * @param event is an earthquake which is grabbed from a given URL and it is displayed
+         *              displayed on the screen
+         */
+        @Override
+        protected void onPostExecute(Event event) {
+            updateUi(event);
+        }
     }
 }
